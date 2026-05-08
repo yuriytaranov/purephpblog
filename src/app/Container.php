@@ -61,6 +61,10 @@ class Container
                     $dependencies[] = $parameter->getDefaultValue();
                 } else if ($parameter->isVariadic()) {
                     $dependencies[] = [];
+                } else if (isset($additional[$parameter->getName()])) {
+                    $dependencies[] = $additional[$parameter->getName()];
+                    unset($additional[$parameter->getName()]);
+                    continue;
                 } else {
                     throw new Exception("Unresolvable dependency [$parameter] in class {$parameter->getDeclaringClass()->getName()}");
                 }

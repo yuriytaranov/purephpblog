@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\Controller;
+use app\ext\Smarty;
 use app\ext\Template;
 use app\http\Request;
 use app\http\Response;
@@ -12,7 +13,7 @@ abstract class HttpController extends Controller {
     /** @var WebApp $app */
     protected $app = null;
 
-    public function __construct(Request $request, public Template $template) {
+    public function __construct(Request $request, public Smarty $template) {
         parent::__construct($request);
     }
 

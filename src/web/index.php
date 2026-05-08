@@ -1,10 +1,12 @@
 <?php
 
 use app\Container;
+use app\ext\Smarty;
 use app\Router;
 use app\http\Response;
 use app\db\drivers\Mysql;
 use app\ext\Template;
+use system\FSL\FSL;
 
 require "../bootstrap.php";
 $container = new Container();
@@ -21,7 +23,17 @@ $container->set(Mysql::class, function () {
 
     return $db;
 });
-$container->set(Template::class, fn () => new Template(confenv("THEME"),confenv("LAYOUT"),));
+$container->set(FSL::class, function () {
+    static $fsl = null;
+    if (is_null($fsl)) {
+        $fsl = new FSL(realpath(__DIR__.'/..'));
+    }
+
+    return $fsl;
+});
+$container->set(Smarty::class, function () use($container) {
+    return $container->build(Smarty::class, ['_theme' => confenv("THEME")]);
+});
 
 $router = new Router($container);
 $router->scan();
