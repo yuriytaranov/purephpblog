@@ -3,7 +3,7 @@
 
 use app\Container;
 use app\db\drivers\Mysql;
-use app\utils\FSL;
+use app\services\FileSystem;
 
 require_once("bootstrap.php");
 
@@ -20,10 +20,10 @@ $container->set(Mysql::class, function () {
 
     return $db;
 });
-$container->set(FSL::class, function () {
+$container->set(FileSystem::class, function () {
     static $fsl = null;
     if (is_null($fsl)) {
-        $fsl = new FSL(__DIR__);
+        $fsl = new FileSystem(__DIR__);
     }
 
     return $fsl;

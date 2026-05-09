@@ -9,7 +9,7 @@ use app\db\repository\PostRepository;
 use app\ext\Smarty;
 use app\http\Request;
 use app\http\Response;
-use app\utils\Text;
+use app\helpers\Text;
 
 class ManageController extends HttpController
 {

@@ -3,11 +3,11 @@
 namespace app\console;
 use app\Command;
 use app\db\drivers\Mysql;
-use app\utils\FSL;
+use app\services\FileSystem;
 use PDO;
 
 class MigrateCommand extends Command {
-    public function __construct(public Mysql $db, public FSL $fsl) {}
+    public function __construct(public Mysql $db, public FileSystem $fsl) {}
     /**
      * Checks if there is a migration storage.
      */

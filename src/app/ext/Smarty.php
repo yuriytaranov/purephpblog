@@ -2,7 +2,7 @@
 
 namespace app\ext;
 
-use app\utils\FSL;
+use app\services\FileSystem;
 use Smarty\Exception;
 
 class Smarty {
@@ -11,10 +11,10 @@ class Smarty {
     private \Smarty\Smarty $_engine;
 
     /**
-     * @param FSL $_fsl
+     * @param FileSystem $_fsl
      * @param string $_theme
      */
-    public function __construct(private FSL $_fsl, private string $_theme) {
+    public function __construct(private FileSystem $_fsl, private string $_theme) {
         $this->_themePath = "{$this->_fsl->themes()}/{$this->_theme}";
     }
 

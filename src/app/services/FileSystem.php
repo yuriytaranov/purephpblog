@@ -1,11 +1,11 @@
 <?php
 
-namespace app\utils;
+namespace app\services;
 
 /**
- * Class FSL is a file system layer.
+ * Class FileSystem is a file system layer.
  */
-class FSL {
+class FileSystem {
     public function __construct(private string $_root) {}
 
     public function root(): string {

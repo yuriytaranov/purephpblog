@@ -3,9 +3,9 @@
 use app\Container;
 use app\db\drivers\Mysql;
 use app\ext\Smarty;
-use app\utils\FSL;
 use app\http\Response;
 use app\Router;
+use app\services\FileSystem;
 
 require "../bootstrap.php";
 $container = new Container();
@@ -22,10 +22,10 @@ $container->set(Mysql::class, function () {
 
     return $db;
 });
-$container->set(FSL::class, function () {
+$container->set(FileSystem::class, function () {
     static $fsl = null;
     if (is_null($fsl)) {
-        $fsl = new FSL(realpath(__DIR__.'/..'));
+        $fsl = new FileSystem(realpath(__DIR__.'/..'));
     }
 
     return $fsl;
