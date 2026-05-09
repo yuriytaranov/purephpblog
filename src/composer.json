@@ -1,6 +1,8 @@
 {
-    "require": {
-      "ext-pdo": "*",
-        "smarty/smarty": "^5.8"
-    }
+  "require": {
+    "ext-pdo": "*",
+    "smarty/smarty": "^5.8",
+    "ext-iconv": "*",
+    "ext-intl": "*"
+  }
 }
