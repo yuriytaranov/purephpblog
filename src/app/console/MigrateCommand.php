@@ -4,9 +4,10 @@ namespace app\console;
 use app\Command;
 use app\db\drivers\Mysql;
 use PDO;
+use system\FSL\FSL;
 
 class MigrateCommand extends Command {
-    public function __construct(public Mysql $db) {}
+    public function __construct(public Mysql $db, public FSL $fsl) {}
     /**
      * Checks if there is a migration storage.
      */
@@ -14,7 +15,7 @@ class MigrateCommand extends Command {
     {
         $result = $this->db->query("show tables like 'migrations'")->fetchAll();
         if(empty($result)) {
-            $this->db->update("create table migrations(id int auto_increment, name varchar(80) not null, created datetime default now(), primary key(id))");
+            $this->db->update("create table migrations(id int auto_increment primary key, name varchar(255) not null, created_at timestamp default current_timestamp)");
         }
     }
 
@@ -24,7 +25,8 @@ class MigrateCommand extends Command {
     public function handle(): void
     {
         $this->storage();
-        $migrations = glob(__DIR__ . "/../db/migrations/*.up.sql");
+        $migrations = glob($this->fsl->migrations().'/*.up.sql');
+        usort($migrations, fn ($a, $b) => strcmp($a, $b));
         array_walk($migrations, function($migration){
             $name = str_replace(".up.sql", "", basename($migration));
             $result = $this->db->query("select `name` from `migrations` where `name` = :name", [':name' => $name])->fetchAll();
@@ -41,10 +43,13 @@ class MigrateCommand extends Command {
 
     public function down(): void
     {
-        $stmt = $this->db->query("select `name` from `migrations` order by `created` desc");
+        $stmt = $this->db->query("select `name` from `migrations` order by `name` desc");
 
-        while(($row = $stmt->fetch(PDO::FETCH_NUM, PDO::FETCH_ORI_PRIOR))) {
-            $this->writeln("Down {$row[0]}");
+        while(($row = $stmt->fetch(PDO::FETCH_ASSOC, PDO::FETCH_ORI_PRIOR))) {
+            $sql = file_get_contents("{$this->fsl->migrations()}/{$row['name']}.down.sql");
+            $this->db->exec($sql);
+            $this->db->query('delete from `migrations` where `name` = :name', ['name' => $row['name']]);
+            $this->writeln("Down {$row['name']} applied");
         }
     }
 

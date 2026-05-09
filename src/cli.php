@@ -23,7 +23,7 @@ $container->set(Mysql::class, function () {
 $container->set(FSL::class, function () {
     static $fsl = null;
     if (is_null($fsl)) {
-        $fsl = new FSL(__DIR__.'../');
+        $fsl = new FSL(__DIR__);
     }
 
     return $fsl;

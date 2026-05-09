@@ -12,15 +12,19 @@ class FSL {
         return $this->_root;
     }
 
+    public function migrations(): string {
+        return $this->_root.'/app/db/migrations';
+    }
+
     public function themes(): string {
-        return $this->_root."/app/themes";
+        return $this->_root.'/app/themes';
     }
 
     public function var(): string {
-        return "{$this->_root}/var";
+        return $this->_root.'/var';
     }
 
     public function etc(): string {
-        return "{$this->_root}/conf";
+        return $this->_root.'/conf';
     }
 }
