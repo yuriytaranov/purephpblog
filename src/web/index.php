@@ -1,12 +1,11 @@
 <?php
 
 use app\Container;
-use app\ext\Smarty;
-use app\Router;
-use app\http\Response;
 use app\db\drivers\Mysql;
-use app\ext\Template;
-use system\FSL\FSL;
+use app\ext\Smarty;
+use app\utils\FSL;
+use app\http\Response;
+use app\Router;
 
 require "../bootstrap.php";
 $container = new Container();

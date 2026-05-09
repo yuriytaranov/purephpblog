@@ -1,6 +1,6 @@
 <?php
 
-namespace system\FSL;
+namespace app\utils;
 
 /**
  * Class FSL is a file system layer.

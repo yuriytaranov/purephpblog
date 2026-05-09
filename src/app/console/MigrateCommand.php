@@ -3,8 +3,8 @@
 namespace app\console;
 use app\Command;
 use app\db\drivers\Mysql;
+use app\utils\FSL;
 use PDO;
-use system\FSL\FSL;
 
 class MigrateCommand extends Command {
     public function __construct(public Mysql $db, public FSL $fsl) {}

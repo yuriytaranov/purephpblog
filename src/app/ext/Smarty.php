@@ -2,8 +2,8 @@
 
 namespace app\ext;
 
+use app\utils\FSL;
 use Smarty\Exception;
-use system\FSL\FSL;
 
 class Smarty {
     private array $_data = [];
