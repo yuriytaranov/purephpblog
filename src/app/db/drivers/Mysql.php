@@ -2,6 +2,7 @@
 
 namespace app\db\drivers;
 use PDO;
+use PDOException;
 use PDOStatement;
 use WebApp;
 
@@ -65,5 +66,17 @@ class Mysql {
      */
     public function exec(string $sql) {
         return $this->_connection->exec($sql);
+    }
+
+    public function transaction(callable $fn): mixed {
+        $this->_connection->beginTransaction();
+        try{
+            $result = call_user_func($fn, $this);
+            $this->_connection->commit();
+            return $result;
+        } catch(PDOException $e){
+            $this->_connection->rollBack();
+            throw $e;
+        }
     }
 }

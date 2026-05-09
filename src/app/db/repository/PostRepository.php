@@ -10,20 +10,31 @@ class PostRepository
 {
     public function __construct(private Mysql $db){}
 
-    public function create(string $image, string $name, string $slug, ?string $description, ?string $text): Post {
-        $id = $this->db->insert(
-            "insert into `posts`(`image`,`name`,`slug`,`description`,`text`) 
-                values(:image, :name, :slug, :description, :text)",
-            [
-                ':image' => $image,
-                ':name' => $name,
-                ':slug' => $slug,
-                ':description' => $description,
-                ':text' => $text,
-            ]
-        );
+    public function create(string $image, string $name, string $slug, ?string $description, ?string $text, array $categories): Post {
+        return $this->db->transaction(function (Mysql $db) use ($image, $name, $slug, $description, $text, $categories) {
+            $id = $db->insert(
+                "insert into `posts`(`image`,`name`,`slug`,`description`,`text`) 
+                    values(:image, :name, :slug, :description, :text)",
+                [
+                    ':image' => $image,
+                    ':name' => $name,
+                    ':slug' => $slug,
+                    ':description' => $description,
+                    ':text' => $text,
+                ]
+            );
+            foreach ($categories as $category) {
+                $db->insert(
+                    "insert into `post_category_rel`(`post_id`, `category_id`) values(:id, :category_id)",
+                    [
+                        ':id' => $id,
+                        ':category_id' => $category
+                    ]
+                );
+            }
 
-        return $this->findById($id);
+            return $this->findById($id);
+        });
     }
 
     public function findById(int $id): Post {

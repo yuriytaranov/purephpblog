@@ -1,7 +1,7 @@
 {extends file='layout.tpl'}
 {block name=title}New Category{/block}
 {block name=body}
-    <form action="/manage/category/save" method="POST">
+    <form action="/manage/category/new" method="POST">
         <div>
             <label>
                 Название:

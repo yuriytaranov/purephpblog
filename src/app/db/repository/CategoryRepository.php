@@ -46,6 +46,21 @@ class CategoryRepository
         return $this->modelFromDbResult($data);
     }
 
+    public function list(): array {
+        $data = $this->db->query(
+            'select `id`,`name`,`slug`,`description`,`created_at`,`updated_at` 
+                from `categories` where `deleted_at` is null')->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+        $result = [];
+        foreach($data as $item) {
+            $result[] = $this->modelFromDbResult($item);
+        }
+
+        return $result;
+    }
+
     private function modelFromDbResult(array $data): Category
     {
         $model = new Category();

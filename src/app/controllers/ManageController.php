@@ -20,16 +20,12 @@ class ManageController extends HttpController
         public PostRepository $postRepository,
     ){
         parent::__construct($request, $template);
-
     }
 
     public function newPost(): Response {
-        return $this->view("manage/post-form", ['post' => new Post()]);
-    }
-
-    public function savePost(): Response {
         if (!$this->_request->isPost) {
-            return $this->view('error', ['error' => 'Страница не найдена']);
+            $categories = $this->categoryRepository->list();
+            return $this->view("manage/post-form", ['categories' => $categories]);
         }
 
         $post = $this->_request->post('post', null);
@@ -40,19 +36,16 @@ class ManageController extends HttpController
         if (!$slug) $slug = Text::slugify($name);
         $description = $post['description'];
         $text = $post['text'];
+        $categories = $post['categories'];
 
-        $this->postRepository->create($image, $name, $slug, $description, $text);
+        $this->postRepository->create($image, $name, $slug, $description, $text, $categories);
 
         return $this->redirect('/');
     }
 
     public function newCategory(): Response {
-        return $this->view("manage/category-form", ['category' => new Category()]);
-    }
-
-    public function saveCategory(): Response {
         if (!$this->_request->isPost) {
-            return $this->view('error', ['error' => 'Страница не найдена']);
+            return $this->view("manage/category-form", []);
         }
 
         $category = $this->_request->post('category', null);

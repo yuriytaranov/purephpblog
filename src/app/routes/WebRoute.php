@@ -14,9 +14,7 @@ class WebRoute extends Route implements IRouter {
         return [
             '/^$/' => [IndexController::class => 'index'],
             '/^manage\/category\/new$/' => [ManageController::class => 'newCategory'],
-            '/^manage\/category\/save/' => [ManageController::class => 'saveCategory'],
             '/^manage\/post\/new$/' => [ManageController::class => 'newPost'],
-            '/^manage\/post\/save/' => [ManageController::class => 'savePost'],
         ];
     }
 }

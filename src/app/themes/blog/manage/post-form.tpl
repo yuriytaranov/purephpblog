@@ -1,7 +1,18 @@
 {extends file="layout.tpl"}
 {block name=title}Создать пост{/block}
 {block name=body}
-    <form action="/manage/post/save" method="POST">
+
+    <form action="/manage/post/new" method="POST">
+        <div>
+            <label>
+                Категория:
+                <select name="post[categories][]" multiple>
+                    {foreach $categories as $value}
+                        <option value="{$value->id}">{$value->name}</option>
+                    {/foreach}
+                </select>
+            </label>
+        </div>
         <div>
             <label>
                 Изображение:
