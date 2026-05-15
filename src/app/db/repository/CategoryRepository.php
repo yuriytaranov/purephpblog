@@ -45,6 +45,8 @@ class CategoryRepository
             [':slug' => $slug]
         )->fetch(PDO::FETCH_ASSOC);
 
+        if (false === $data) return null;
+
         return $this->modelFromDbResult($data);
     }
 

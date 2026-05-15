@@ -30,7 +30,17 @@ class Mysql {
     public function query(string $sql, array $fields = [])
     {
         $stmt = $this->_connection->prepare($sql);
-        $stmt->execute($fields);
+
+        foreach ($fields as $name => $field) {
+            if (is_array($field)) {
+                $stmt->bindValue($name, $field[0], $field[1]);
+            } else {
+                $stmt->bindValue($name, $field);
+            }
+        }
+
+        $stmt->execute();
+
         return $stmt;
     }
 

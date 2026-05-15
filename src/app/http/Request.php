@@ -39,6 +39,10 @@ class Request {
      * @var bool If request is post then true.
      */
     public $isPost = false;
+    /**
+     * @var string request uri.
+     */
+    private $_uri = null;
 
     /**
      * Fill the args property with a path values.
@@ -77,6 +81,7 @@ class Request {
         $this->_port = $_SERVER['SERVER_PORT'];
         $this->_host = $_SERVER['HTTP_HOST'];
         $this->_path = $this->cleanPath($_SERVER['REQUEST_URI']);
+        $this->_uri = $_SERVER['REQUEST_URI'];
         $this->_get = $_GET;
         $this->_post = $_POST;
         $this->_session = $_SESSION;
@@ -115,6 +120,16 @@ class Request {
     }
 
     /**
+     * Returns the value of get global otherwise default value.
+     * @param string $name
+     * @param mixed|null $default
+     * @return mixed|null
+     */
+    public function get(string $name, mixed $default = null): mixed {
+        return $this->_get[$name] ?? $default;
+    }
+
+    /**
      * Gets the post argument.
      * @param $name
      * @param $default
@@ -143,5 +158,9 @@ class Request {
     public function sessionSet($name, $value) {
         $this->_session[$name] = $value;
         $_SESSION[$name] = $value;
+    }
+
+    public function url(): Url{
+        return new Url($this->_request_uri);
     }
 }
