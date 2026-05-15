@@ -6,15 +6,17 @@ use app\services\FileSystem;
 use Smarty\Exception;
 
 class Smarty {
-    private array $_data = [];
     private string $_themePath = "";
-    private \Smarty\Smarty $_engine;
 
     /**
      * @param FileSystem $_fsl
      * @param string $_theme
      */
-    public function __construct(private FileSystem $_fsl, private string $_theme) {
+    public function __construct(
+        private FileSystem $_fsl,
+        private string $_theme,
+        private array $extensions
+    ) {
         $this->_themePath = "{$this->_fsl->themes()}/{$this->_theme}";
     }
 
@@ -23,7 +25,10 @@ class Smarty {
         $smarty->setTemplateDir($this->_themePath);
         $smarty->setCompileDir($this->_themePath."/compiled");
         $smarty->setCacheDir($this->_themePath."/cache");
-        $smarty->setConfigDir(__DIR__.'/../../config/smarty');
+        $smarty->setConfigDir($this->_fsl->etc().'/smarty');
+        if (count($this->extensions) > 0) {
+            $smarty->setExtensions($this->extensions);
+        }
 
         return $smarty;
     }
