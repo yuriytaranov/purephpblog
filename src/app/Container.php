@@ -10,6 +10,9 @@ class Container
 {
     private array $bindings = [];
 
+    private array $instances = [];
+
+
     public function set($id, $factory): void
     {
         $this->bindings[$id] = $factory;
@@ -20,19 +23,26 @@ class Container
      */
     public function get($id)
     {
+        if (isset($this->instances[$id])) {
+            return $this->instances[$id];
+        }
+
         if (!isset($this->bindings[$id])) {
             throw new Exception("Target binding [$id] does not exist.");
         }
 
         $factory = $this->bindings[$id];
 
-        return $factory($this);
+        $instance = $factory($this);
+        $this->instances[$id] = $instance;
+
+        return $instance;
     }
 
     /**
      * @throws Exception
      */
-    public function build(string $class, array $additional = [])
+    public function build(string $class)
     {
         try {
             $reflector = new ReflectionClass($class);
@@ -61,10 +71,6 @@ class Container
                     $dependencies[] = $parameter->getDefaultValue();
                 } else if ($parameter->isVariadic()) {
                     $dependencies[] = [];
-                } else if (isset($additional[$parameter->getName()])) {
-                    $dependencies[] = $additional[$parameter->getName()];
-                    unset($additional[$parameter->getName()]);
-                    continue;
                 } else {
                     throw new Exception("Unresolvable dependency [$parameter] in class {$parameter->getDeclaringClass()->getName()}");
                 }
@@ -80,13 +86,10 @@ class Container
                     $dependencies[] = $parameter->getDefaultValue();
                 } else {
                     $dependency = $this->build($parameter->getType()->getName());
-                    $this->set($name, $dependency);
                     $dependencies[] = $dependency;
                 }
             }
         }
-
-        $dependencies = array_merge($dependencies, $additional);
 
         return $reflector->newInstanceArgs($dependencies);
     }
