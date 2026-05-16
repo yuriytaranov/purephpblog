@@ -1,5 +1,5 @@
 {extends file='layout.tpl'}
-{block name=title}{$category->name|escape:html}}{/block}
+{block name=title}{$category->name|escape:html}{/block}
 {block name=body}
     <div>
         <h1>{$category->name|escape:html}</h1>

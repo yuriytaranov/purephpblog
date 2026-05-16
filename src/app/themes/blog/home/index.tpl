@@ -3,7 +3,7 @@
 {block name=body}
     {foreach $data as $category}
         <div>
-            <div>{$category->category_name|escape:html}}</div>
+            <div>{$category->category_name|escape:html}</div>
             <ul>
             {foreach $category->posts as $post}
                 <li>
