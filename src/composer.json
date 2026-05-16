@@ -3,6 +3,7 @@
     "ext-pdo": "*",
     "smarty/smarty": "^5.8",
     "ext-iconv": "*",
-    "ext-intl": "*"
+    "ext-intl": "*",
+    "ext-fileinfo": "*"
   }
 }

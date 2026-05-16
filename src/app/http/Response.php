@@ -6,7 +6,7 @@ use app\ext\Json;
 
 class Response {
     /**
-     * @var string Stored result.
+     * @var mixed Stored result.
      */
     private $_result = '';
     /**

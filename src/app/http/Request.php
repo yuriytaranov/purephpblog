@@ -2,6 +2,8 @@
 
 namespace app\http;
 
+use app\http\request\File;
+
 class Request {
     /**
      * @var array Session parameters.
@@ -43,6 +45,10 @@ class Request {
      * @var string request uri.
      */
     private $_uri = null;
+    /**
+     * @var array files in the request.
+     */
+    private array $_files = [];
 
     /**
      * Fill the args property with a path values.
@@ -78,6 +84,7 @@ class Request {
      */
     public function __construct()
     {
+        $this->_files = $_FILES;
         $this->_port = $_SERVER['SERVER_PORT'];
         $this->_host = $_SERVER['HTTP_HOST'];
         $this->_path = $this->cleanPath($_SERVER['REQUEST_URI']);
@@ -104,6 +111,24 @@ class Request {
     {
         $name = "_{$name}";
         return $this->$name;
+    }
+
+    /**
+     * Request file.
+     * @param string $name
+     * @return File|null
+     */
+    public function file(string $name): ?File {
+        if (!isset($this->_files[$name])) { return null; }
+
+        return new File(
+            $this->_files[$name]['name'],
+            $this->_files[$name]['type'],
+            $this->_files[$name]['size'],
+            $this->_files[$name]['tmp_name'],
+            $this->_files[$name]['error'],
+            $this->_files[$name]['full_path']
+        );
     }
 
     /**

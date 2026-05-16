@@ -3,14 +3,14 @@
 create table posts
 (
     id          int auto_increment primary key,
-    image       varchar(255)                        not null,
+    file_id     int                                 null,
     name        varchar(255)                        not null,
     slug        varchar(255)                        not null,
     description text                                null,
     text        text                                null,
     views       int                                 not null default 0,
     created_at  timestamp default current_timestamp not null,
-    updated_at  timestamp default current_timestamp not null on update current_timestamp,
+    updated_at  timestamp default current_timestamp not null,
     deleted_at  timestamp                           null
 );
 

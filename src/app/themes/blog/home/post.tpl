@@ -1,12 +1,16 @@
 {extends "layout.tpl"}
 {block name=title}{$post->name}{/block}
 {block name=body}
+    <h1>{$post->name}</h1>
     <div>
         Создано: {$post->created_at|date_format:"%d.%m.%Y %H:%M"}
         {if $post->created_at neq $post->updated_at}
             Обновлено: {$post->updated_at|date_format:"%d.%m.%Y %H:%M"}
         {/if}
         Просмотров: {$post->views}
+    </div>
+    <div>
+        <img src="/file/{$imageUrl}" />
     </div>
     <div>
         {$post->description|escape:html}

@@ -10,6 +10,10 @@ use app\http\Response;
 abstract class Route {
     abstract public function map();
     public function __construct(private Container $container) {}
+
+    /**
+     * @throws \Exception
+     */
     public function handle(Request $request): ?Response
     {
         foreach($this->map() as $path => $callbackName) {
@@ -19,7 +23,7 @@ abstract class Route {
             if(1 === $routeProcess) {
                 $controllerClass = key($callbackName);
                 $action = $callbackName[$controllerClass];
-                $controller = $this->container->build($controllerClass, [$request]);
+                $controller = $this->container->build($controllerClass);
                 return $controller->$action(...$actionArguments);
             }
         }

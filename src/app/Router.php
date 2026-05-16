@@ -30,10 +30,11 @@ class Router {
      * Router handler
      *
      * @return Response The answer.
+     * @throws \Exception
      */
     public function handle(): Response
     {
-        $request = new Request();
+        $request = $this->container->get(Request::class);
         foreach($this->_routers as $route) {
             if(($result = $route->handle($request)) !== null) {
                 return $result;

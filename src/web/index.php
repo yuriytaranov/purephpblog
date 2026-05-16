@@ -4,6 +4,7 @@ use app\Container;
 use app\db\drivers\Mysql;
 use app\ext\Smarty;
 use app\ext\SmartyFactory;
+use app\http\Request;
 use app\http\Response;
 use app\Router;
 use app\services\FileSystem;
@@ -12,6 +13,7 @@ require "../bootstrap.php";
 
 $container = new Container();
 $container->set(Response::class, fn () => new Response());
+$container->set(Request::class, fn () => new Request());
 $container->set(Mysql::class, fn () => new Mysql(
     confenv("DATABASE_URL"),
     confenv('DATABASE_USER'),
@@ -31,4 +33,4 @@ $app = new WebApp($router);
 
 $response = $app->handle();
 
-echo $response->send();
+exit($response->send());

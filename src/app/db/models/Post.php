@@ -6,7 +6,7 @@ class Post
 {
     public string $table = 'posts';
     public int $id;
-    public string $image;
+    public ?string $image;
     public string $name;
     public string $slug;
     public ?string $description;

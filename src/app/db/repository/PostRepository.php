@@ -5,19 +5,20 @@ namespace app\db\repository;
 use app\db\drivers\Mysql;
 use app\db\models\Post;
 use app\dto\Pager;
+use app\dto\PostWithImage;
 use PDO;
 
 class PostRepository
 {
     public function __construct(private Mysql $db){}
 
-    public function create(string $image, string $name, string $slug, ?string $description, ?string $text, array $categories): Post {
-        return $this->db->transaction(function (Mysql $db) use ($image, $name, $slug, $description, $text, $categories) {
+    public function create(?int $imageId, string $name, string $slug, ?string $description, ?string $text, array $categories): Post {
+        return $this->db->transaction(function (Mysql $db) use ($imageId, $name, $slug, $description, $text, $categories) {
             $id = $db->insert(
-                "insert into `posts`(`image`,`name`,`slug`,`description`,`text`) 
+                "insert into `posts`(`file_id`,`name`,`slug`,`description`,`text`) 
                     values(:image, :name, :slug, :description, :text)",
                 [
-                    ':image' => $image,
+                    ':image' => $imageId,
                     ':name' => $name,
                     ':slug' => $slug,
                     ':description' => $description,
@@ -40,8 +41,10 @@ class PostRepository
 
     public function findById(int $id): ?Post {
         $data = $this->db->query(
-            'select `id`,`name`,`image`,`slug`,`description`,`text`,`views`,`created_at`,`updated_at`
-       from posts where id = :id',
+            'select p.`id`,p.`name`,f.`path` as `image`,`slug`,`description`,`text`,`views`,p.`created_at`,`updated_at`
+       from posts p
+            left join `files` f on f.`id` = `p`.`file_id`
+       where p.id = :id',
             ['id' => $id]
         )->fetch(PDO::FETCH_ASSOC);
 
@@ -50,22 +53,33 @@ class PostRepository
         return $this->modelFromDbResult($data);
     }
 
-    public function findBySlug(string $slug): ?Post {
+    public function findBySlugWithFile(string $slug): ?PostWithImage {
         $data = $this->db->query(
-            'select `id`,`name`,`image`,`slug`,`description`,`text`,`views`,`created_at`,`updated_at`
-            from posts where slug = :slug',['slug' => $slug]
+            'select 
+                p.`id`,p.`name`,f.`path` as `file_path`,f.name as file_name, f.mime_type as file_mime_type,
+                f.size as file_size, `slug`,`description`,`text`,`views`,p.`created_at`,`updated_at`
+            from posts p
+            left join `files` f on f.`id` = `p`.`file_id`
+            where slug = :slug',['slug' => $slug]
         )->fetch(PDO::FETCH_ASSOC);
 
         if (false === $data) { return null; }
 
-        return $this->modelFromDbResult($data);
+        return new PostWithImage(
+            $this->modelFromDbResult($data),
+            $data['file_path'],
+            $data['file_name'],
+            $data['file_mime_type'],
+            $data['file_size'],
+        );
     }
 
     public function findSimilarPostsById(int $id, int $limit = 3): array {
         $data = $this->db->query(
-            'select p.`id`,`name`,`slug`,`image` 
+            'select p.`id`,p.`name`,`slug`,f.`path` as `image` 
                 from posts p 
                 join `post_category_rel` pcr on p.id = pcr.post_id
+                join `files` f on f.id = p.`file_id`
                 where pcr.category_id in (
                     select category_id 
                     from post_category_rel
@@ -111,9 +125,10 @@ class PostRepository
         if ($count == 0) { return new Pager(0, []); }
 
         $data = $this->db->query(
-            "select p.`id`,`name`,`image`,`slug`,`description`,`text`,`views`,`created_at`,`updated_at`
+            "select p.`id`,p.`name`,f.`path` as `image`,`slug`,`description`,`text`,`views`,p.`created_at`,`updated_at`
             from `posts` p
             join `post_category_rel` pcr on `post_id` = p.`id`
+            join `files` f on p.`file_id` = f.`id`
             where pcr.`category_id` = :category_id
             {$orderByQuery}
             limit :limit offset :offset",
@@ -126,7 +141,7 @@ class PostRepository
     public function modelFromDbResult(array $data): Post {
         $post = new Post();
         $post->id = $data['id'];
-        $post->image = $data['image'] ?? '';
+        $post->image = $data['file_id'] ?? 0;
         $post->name = $data['name'];
         $post->slug = $data['slug'];
         $post->description = $data['description'] ?? '';

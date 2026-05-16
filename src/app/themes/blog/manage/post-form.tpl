@@ -2,7 +2,7 @@
 {block name=title}Создать пост{/block}
 {block name=body}
 
-    <form action="/manage/post/new" method="POST">
+    <form action="/manage/post/new" method="POST" enctype="multipart/form-data">
         <div>
             <label>
                 Категория:
@@ -16,7 +16,7 @@
         <div>
             <label>
                 Изображение:
-                <input type="text" name="post[image]" />
+                <input type="file" name="post_image" />
             </label>
         </div>
         <div>

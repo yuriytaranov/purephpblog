@@ -10,6 +10,7 @@ use app\ext\Smarty;
 use app\http\Request;
 use app\http\Response;
 use app\helpers\Text;
+use app\services\FileService;
 
 class ManageController extends HttpController
 {
@@ -18,6 +19,7 @@ class ManageController extends HttpController
         Smarty $template,
         public CategoryRepository $categoryRepository,
         public PostRepository $postRepository,
+        public FileService $fileService,
     ){
         parent::__construct($request, $template);
     }
@@ -30,7 +32,7 @@ class ManageController extends HttpController
 
         $post = $this->_request->post('post', null);
 
-        $image = $post['image'];
+        $image = $this->fileService->upload($this->_request, 'post_image');
         $name = $post['name'];
         $slug = $post['slug'];
         if (!$slug) $slug = Text::slugify($name);
@@ -38,7 +40,7 @@ class ManageController extends HttpController
         $text = $post['text'];
         $categories = $post['categories'];
 
-        $this->postRepository->create($image, $name, $slug, $description, $text, $categories);
+        $this->postRepository->create($image->id ?? null, $name, $slug, $description, $text, $categories);
 
         return $this->redirect('/');
     }

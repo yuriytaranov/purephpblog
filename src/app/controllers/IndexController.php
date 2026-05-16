@@ -9,6 +9,7 @@ use app\db\repository\PostRepository;
 use app\ext\Smarty;
 use app\http\Request;
 use app\http\Response;
+use app\services\FileService;
 
 class IndexController extends HttpController
 {
@@ -17,6 +18,7 @@ class IndexController extends HttpController
         Smarty                     $template,
         private CategoryRepository $categoryRepository,
         private PostRepository     $postRepository,
+        private FileService        $fileService,
     )
     {
         parent::__construct($request, $template);
@@ -58,11 +60,20 @@ class IndexController extends HttpController
     }
 
     public function post(string $slug): Response {
-        $post = $this->postRepository->findBySlug($slug);
-        $post->views += 1;
-        $this->postRepository->updateViewsById($post->id, $post->views);
-        $similarPosts = $this->postRepository->findSimilarPostsById($post->id);
+        $data = $this->postRepository->findBySlugWithFile($slug);
 
-        return $this->view("home/post", ['post' => $post, 'similar' => $similarPosts]);
+        if (is_null($data)) {
+            return $this->view('error', ['error' => 'Пост не найден']);
+        }
+
+        $data->post->views += 1;
+        $this->postRepository->updateViewsById($data->post->id, $data->post->views);
+        $similarPosts = $this->postRepository->findSimilarPostsById($data->post->id);
+
+        return $this->view("home/post", [
+            'post' => $data->post,
+            'similar' => $similarPosts,
+            'imageUrl' => "{$data->file_path}/{$data->file_name}",
+        ]);
     }
 }
