@@ -34,7 +34,7 @@ class IndexController extends HttpController
     public function category(string $slug): Response
     {
         $page = max(1, $this->_request->get('page', 1));
-        $limit = $this->_request->get('limit', 20);
+        $limit = $this->_request->get('limit', 3);
         $orderBy = $this->_request->get('sort', []);
 
         $category = $this->categoryRepository->findBySlug($slug);
