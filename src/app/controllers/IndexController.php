@@ -56,4 +56,13 @@ class IndexController extends HttpController
             'order' => $order,
         ]);
     }
+
+    public function post(string $slug): Response {
+        $post = $this->postRepository->findBySlug($slug);
+        $post->views += 1;
+        $this->postRepository->updateViewsById($post->id, $post->views);
+        $similarPosts = $this->postRepository->findSimilarPostsById($post->id);
+
+        return $this->view("home/post", ['post' => $post, 'similar' => $similarPosts]);
+    }
 }

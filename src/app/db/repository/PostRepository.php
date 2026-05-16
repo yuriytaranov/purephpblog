@@ -48,6 +48,39 @@ class PostRepository
         return $this->modelFromDbResult($data);
     }
 
+    public function findBySlug(string $slug): ?Post {
+        $data = $this->db->query(
+            'select `id`,`name`,`image`,`slug`,`description`,`text`,`views`,`created_at`,`updated_at`
+            from posts where slug = :slug',['slug' => $slug]
+        )->fetch(PDO::FETCH_ASSOC);
+
+        if (false === $data) { return null; }
+
+        return $this->modelFromDbResult($data);
+    }
+
+    public function findSimilarPostsById(int $id, int $limit = 3): array {
+        $data = $this->db->query(
+            'select p.`id`,`name`,`slug`,`image` 
+                from posts p 
+                join `post_category_rel` pcr on p.id = pcr.post_id
+                where pcr.category_id in (
+                    select category_id 
+                    from post_category_rel
+                    where post_id = :id
+                ) 
+                and p.id <> :id
+                limit :limit',
+            ['limit' => [$limit, PDO::PARAM_INT], 'id' => [$id, PDO::PARAM_INT]]
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($item) => $this->modelFromDbResult($item), $data);
+    }
+
+    public function updateViewsById(int $id, int $views): void {
+        $this->db->update('update `posts` set views = :views where `id` = :id', ['views' => $views, 'id' => $id]);
+    }
+
     public function listByCategory(int $categoryId, int $offset = 0, int $limit = 20, array $orderBy = []): Pager {
         $orderByQuery = '';
         if (!empty($orderBy)) {
@@ -95,14 +128,14 @@ class PostRepository
     public function modelFromDbResult(array $data): Post {
         $post = new Post();
         $post->id = $data['id'];
-        $post->image = $data['image'];
+        $post->image = $data['image'] ?? '';
         $post->name = $data['name'];
         $post->slug = $data['slug'];
-        $post->description = $data['description'];
-        $post->text = $data['text'];
-        $post->views = $data['views'];
-        $post->created_at = strtotime($data['created_at']);
-        $post->updated_at = strtotime($data['updated_at']);
+        $post->description = $data['description'] ?? '';
+        $post->text = $data['text'] ?? '';
+        $post->views = $data['views'] ?? 0;
+        $post->created_at = strtotime($data['created_at'] ?? 0);
+        $post->updated_at = strtotime($data['updated_at'] ?? 0);
 
         return $post;
     }
