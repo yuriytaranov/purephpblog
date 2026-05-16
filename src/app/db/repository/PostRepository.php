@@ -118,10 +118,6 @@ class PostRepository
             [':category_id' => $categoryId, ':limit' => [$limit, PDO::PARAM_INT], ':offset' => [$offset, PDO::PARAM_INT]]
         )->fetchAll(PDO::FETCH_ASSOC);
 
-        if (false === $data) {
-            return new Pager($count, []);
-        }
-
         return new Pager($count, array_map(fn($post) => $this->modelFromDbResult($post), $data));
     }
 
