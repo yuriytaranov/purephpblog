@@ -67,6 +67,6 @@ class Pager
     }
 
     public function isLast(): bool {
-        return $this->current === $this->totalPages;
+        return $this->current === $this->totalPages || 0 === $this->totalPages;
     }
 }

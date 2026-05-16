@@ -9,16 +9,17 @@ use app\db\repository\PostRepository;
 use app\ext\Smarty;
 use app\http\Request;
 use app\http\Response;
+use app\services\CategoryService;
 use app\services\FileService;
+use app\services\PostService;
 
 class IndexController extends HttpController
 {
     public function __construct(
         Request                    $request,
         Smarty                     $template,
-        private CategoryRepository $categoryRepository,
-        private PostRepository     $postRepository,
-        private FileService        $fileService,
+        private CategoryService    $categoryService,
+        private PostService        $postService,
     )
     {
         parent::__construct($request, $template);
@@ -29,51 +30,38 @@ class IndexController extends HttpController
      */
     public function index(): Response
     {
-        $data = $this->categoryRepository->listWithPosts();
+        $data = $this->categoryService->listWithPosts();
         return $this->view("home/index", ['data' => $data]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function category(string $slug): Response
     {
         $page = max(1, $this->_request->get('page', 1));
         $limit = $this->_request->get('limit', 3);
         $orderBy = $this->_request->get('sort', []);
 
-        $category = $this->categoryRepository->findBySlug($slug);
-        if (is_null($category)) {
+        $data = $this->categoryService->categoryWithOrderAndPaging($slug, $this->_request->uri, $page, $limit, $orderBy);
+
+        if (is_null($data)) {
             return $this->view('error', ['error' => 'Категория не найдена']);
         }
 
-        $posts = $this->postRepository->listByCategory($category->id, ($page - 1) * $limit, $limit, $orderBy);
-
-        $order = new Orderer(
-            $this->_request->uri,
-            array_merge(['created_at' => Orderer::SORT_ASC, 'views' => Orderer::SORT_ASC], $orderBy)
-        );
-        $pager = new Pager($this->_request->uri, $posts->total, $limit, $page, $posts->data);
-
-        return $this->view("home/category", [
-            'category' => $category,
-            'pager' => $pager,
-            'order' => $order,
-        ]);
+        return $this->view("home/category", $data);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function post(string $slug): Response {
-        $data = $this->postRepository->findBySlugWithFile($slug);
+        $data = $this->postService->getPostBySlugWithSimilar($slug);
 
         if (is_null($data)) {
             return $this->view('error', ['error' => 'Пост не найден']);
         }
 
-        $data->post->views += 1;
-        $this->postRepository->updateViewsById($data->post->id, $data->post->views);
-        $similarPosts = $this->postRepository->findSimilarPostsById($data->post->id);
-
-        return $this->view("home/post", [
-            'post' => $data->post,
-            'similar' => $similarPosts,
-            'imageUrl' => "{$data->file_path}/{$data->file_name}",
-        ]);
+        return $this->view("home/post", $data);
     }
 }

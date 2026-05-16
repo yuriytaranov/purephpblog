@@ -1,5 +1,5 @@
 {extends "layout.tpl"}
-{block name=title}{$post->name}{/block}
+{block name=title}{$post->name|escape:html}}{/block}
 {block name=body}
     <h1>{$post->name}</h1>
     <div>
@@ -10,7 +10,9 @@
         Просмотров: {$post->views}
     </div>
     <div>
-        <img src="/file/{$imageUrl}" />
+        {if $imageUrl gt 0}
+        <img src="/file/{$imageUrl|escape}" />
+        {/if}
     </div>
     <div>
         {$post->description|escape:html}

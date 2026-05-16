@@ -5,7 +5,7 @@ namespace app\services;
 use app\db\repository\FileRepository;
 use app\dto\DownloadFile;
 use app\dto\PathInfo;
-use app\http\Request;
+use app\http\request\File as RequestFile;
 use app\db\models\File;
 
 class FileService
@@ -33,9 +33,7 @@ class FileService
         return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
     }
 
-    public function upload(Request $request, string $file): ?File {
-        $requestFile = $request->file($file);
-        if (is_null($requestFile)) { return null; }
+    public function upload(RequestFile $requestFile, string $file): ?File {
         if (!file_exists($requestFile->tmp_name)) { return null; }
 
         $path = date('Y') . '/' . date('m') . '/' . date('d');

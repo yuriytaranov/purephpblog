@@ -10,41 +10,38 @@ use app\ext\Smarty;
 use app\http\Request;
 use app\http\Response;
 use app\helpers\Text;
+use app\services\CategoryService;
 use app\services\FileService;
+use app\services\PostService;
 
 class ManageController extends HttpController
 {
     public function __construct(
         Request $request,
         Smarty $template,
-        public CategoryRepository $categoryRepository,
-        public PostRepository $postRepository,
-        public FileService $fileService,
+        private CategoryService $categoryService,
+        private PostService $postService,
     ){
         parent::__construct($request, $template);
     }
 
     public function newPost(): Response {
         if (!$this->_request->isPost) {
-            $categories = $this->categoryRepository->list();
+            $categories = $this->categoryService->list();
             return $this->view("manage/post-form", ['categories' => $categories]);
         }
 
         $post = $this->_request->post('post', null);
+        $requestFile = $this->_request->file('post_image');
 
-        $image = $this->fileService->upload($this->_request, 'post_image');
-        $name = $post['name'];
-        $slug = $post['slug'];
-        if (!$slug) $slug = Text::slugify($name);
-        $description = $post['description'];
-        $text = $post['text'];
-        $categories = $post['categories'];
+        $data = $this->postService->newPost($requestFile, $post);
 
-        $this->postRepository->create($image->id ?? null, $name, $slug, $description, $text, $categories);
-
-        return $this->redirect('/');
+        return $this->redirect("/post/{$data->slug}");
     }
 
+    /**
+     * @throws \Exception
+     */
     public function newCategory(): Response {
         if (!$this->_request->isPost) {
             return $this->view("manage/category-form", []);
@@ -52,13 +49,8 @@ class ManageController extends HttpController
 
         $category = $this->_request->post('category', null);
 
-        $name = $category['name'];
-        $slug = $category['slug'];
-        if (!$slug) $slug = Text::slugify($name);
-        $description = $category['description'];
+        $data = $this->categoryService->newCategory($category);
 
-        $this->categoryRepository->create($name, $slug, $description);
-
-        return $this->redirect('/');
+        return $this->redirect("/category/{$data->slug}");
     }
 }
