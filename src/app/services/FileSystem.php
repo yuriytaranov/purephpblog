@@ -35,6 +35,14 @@ class FileSystem {
         return $this->var().'/upload';
     }
 
+    public function tmp(): string {
+        return sys_get_temp_dir();
+    }
+
+    public function test(): string {
+        return $this->_root.'/test';
+    }
+
     public function mkdir(string $path): bool {
         if (file_exists($path)) {
             return true;

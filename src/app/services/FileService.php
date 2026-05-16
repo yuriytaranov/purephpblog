@@ -33,31 +33,50 @@ class FileService
         return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
     }
 
-    public function upload(RequestFile $requestFile, string $file): ?File {
-        if (!file_exists($requestFile->tmp_name)) { return null; }
-
+    private function create(string $source, string $name, int $size, callable $callback): ?File {
         $path = date('Y') . '/' . date('m') . '/' . date('d');
         $fullPath = "{$this->fsl->upload()}/{$path}";
         $this->fsl->mkdir($fullPath);
 
-        $hash = $this->sha256($requestFile->tmp_name);
-        $info = $this->pathinfo($requestFile->full_path);
-        $mimeType = $this->mimeType($requestFile->tmp_name);
-        $size = $requestFile->size;
+        $hash = $this->sha256($source);
+        $info = $this->pathinfo($name);
+        $mimeType = $this->mimeType($source);
 
         $destination = "{$fullPath}/{$hash}.{$info->extension}";
 
-        if (!move_uploaded_file($requestFile->tmp_name, $destination)) {
+        if (!$callback($source, $destination)) {
             return null;
         }
 
         $fileName = time() . '_' . $info->basename;
 
-        $data = $this->fileRepository->create($path, $fileName, $mimeType, $size,  $hash);
+        return $this->fileRepository->create($path, $fileName, $mimeType, $size,  $hash);
+    }
 
-        if (is_null($data)) { return null; }
+    public function createByLocalPath(string $filePath): ?File {
+        $info = $this->pathinfo($filePath);
+        $size = filesize($filePath);
+        return $this->create(
+            $filePath,
+            $info->basename,
+            $size,
+            function (string $source, string $destination) {
+                return copy($source, $destination);
+            }
+        );
+    }
 
-        return $data;
+    public function upload(RequestFile $requestFile, string $file): ?File {
+        if (!file_exists($requestFile->tmp_name)) { return null; }
+
+        return $this->create(
+            $requestFile->tmp_name,
+            $requestFile->name,
+            $requestFile->size,
+            function (string $source, string $destination): bool {
+                return move_uploaded_file($source, $destination);
+            },
+        );
     }
 
     public function getDownloadFileByPathAndName(string $path, string $name): ?DownloadFile {

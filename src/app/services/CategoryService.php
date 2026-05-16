@@ -26,7 +26,7 @@ class CategoryService
 
     public function newCategory(array $category): Category {
         $name = $category['name'];
-        $slug = $category['slug'];
+        $slug = $category['slug'] ?? null;
         if (!$slug) $slug = Text::slugify($name);
         $description = $category['description'];
 

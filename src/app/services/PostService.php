@@ -6,6 +6,7 @@ use app\db\models\Post;
 use app\db\repository\PostRepository;
 use app\helpers\Text;
 use app\http\request\File;
+use app\db\models\File as DbFile;
 
 class PostService
 {
@@ -32,15 +33,19 @@ class PostService
         ];
     }
 
-    public function newPost(File $requestFile, array $post): ?Post {
-        $image = $this->fileService->upload($requestFile, 'post_image');
+    public function createPost(array $post, DbFile | null $image = null): ?Post {
         $name = $post['name'];
-        $slug = $post['slug'];
+        $slug = $post['slug'] ?? null;
         if (!$slug) $slug = Text::slugify($name);
         $description = $post['description'];
         $text = $post['text'];
         $categories = $post['categories'];
 
         return $this->postRepository->create($image->id ?? null, $name, $slug, $description, $text, $categories);
+    }
+
+    public function newPost(File $requestFile, array $post): ?Post {
+        $image = $this->fileService->upload($requestFile, 'post_image');
+        return $this->createPost($post, $image);
     }
 }
