@@ -32,7 +32,10 @@ class FileRepository
     public function findByPathAndName(string $path, string $name): ?File {
         $data = $this->db->query(
             'select `id`,`path`,`name`,`mime_type`,`size`,`hash`,`created_at`,`deleted_at`
-            from `files` where `path` = :path and `name` = :name',
+            from `files` 
+            where `path` = :path 
+                and `name` = :name 
+                and `deleted_at` is null',
             ['path' => $path, 'name' => $name]
         )->fetch(PDO::FETCH_ASSOC);
 
