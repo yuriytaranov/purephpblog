@@ -38,12 +38,14 @@ class PostRepository
         });
     }
 
-    public function findById(int $id): Post {
+    public function findById(int $id): ?Post {
         $data = $this->db->query(
             'select `id`,`name`,`image`,`slug`,`description`,`text`,`views`,`created_at`,`updated_at`
        from posts where id = :id',
             ['id' => $id]
         )->fetch(PDO::FETCH_ASSOC);
+
+        if (false === $data) { return null; }
 
         return $this->modelFromDbResult($data);
     }
