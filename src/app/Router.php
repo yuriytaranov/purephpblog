@@ -44,7 +44,7 @@ class Router {
         //TODO: The router must not create a new response in case of errors.
         $response = new Response();
         
-        $response->json->error(404, 'Not found!');
+        $response->set("Ошибка: страница не найдена");
         return $response;
     }
 }
