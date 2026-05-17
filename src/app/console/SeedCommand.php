@@ -64,6 +64,8 @@ class SeedCommand extends Command
                 ],
                 $image
             );
+
+            unlink($tempFilePath);
         }
 
         $this->writeln("Готово!");
